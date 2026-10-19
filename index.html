@@ -1,0 +1,1427 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>Usage Lens - See where your AI credits go</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a0d12;
+        --bg-soft: #0e1219;
+        --panel: #12171f;
+        --panel-2: #171e28;
+        --panel-3: #1c2531;
+        --border: #232d3a;
+        --border-soft: #1b232f;
+        --text: #e9eef5;
+        --muted: #97a5b6;
+        --faint: #627184;
+        --teal: #2fd6b5;
+        --amber: #f0b24a;
+        --sky: #4cc3ff;
+        --violet: #a78bfa;
+        --red: #ff6b6b;
+        --red-dim: rgba(255, 107, 107, 0.12);
+        --amber-dim: rgba(240, 178, 74, 0.12);
+        --teal-dim: rgba(47, 214, 181, 0.12);
+        --track: #232d3a;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        --radius: 14px;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 56px; }
+
+      /* ---------- header ---------- */
+      .topbar {
+        display: flex; flex-wrap: wrap; gap: 14px 18px;
+        align-items: flex-end; justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      .topbar h1 { font-size: 24px; line-height: 1.15; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.01em; }
+      .topbar .sub { color: var(--muted); font-size: 13.5px; margin: 0; }
+      .top-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+      .badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+        padding: 4px 10px; border-radius: 999px;
+        border: 1px solid var(--border); background: var(--panel);
+        color: var(--muted); white-space: nowrap;
+      }
+      .badge.plan { color: var(--teal); border-color: var(--teal); background: var(--teal-dim); }
+      .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+      .seg {
+        display: inline-flex; background: var(--panel); border: 1px solid var(--border);
+        border-radius: 10px; padding: 3px; gap: 2px;
+      }
+      .seg button {
+        appearance: none; border: 0; background: transparent; color: var(--muted);
+        font: inherit; font-size: 13px; font-weight: 600; padding: 6px 13px;
+        border-radius: 7px; cursor: pointer; white-space: nowrap;
+      }
+      .seg button:hover { color: var(--text); }
+      .seg button[aria-pressed="true"] { background: var(--panel-3); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
+      .countdown-chip {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+        padding: 7px 12px; font-size: 13px; color: var(--muted);
+      }
+      .countdown-chip strong { color: var(--text); font-weight: 600; }
+      .countdown-chip svg { flex: none; }
+
+      /* ---------- cards & layout ---------- */
+      .card {
+        background: var(--panel); border: 1px solid var(--border-soft);
+        border-radius: var(--radius); box-shadow: var(--shadow);
+      }
+      .card-pad { padding: 20px 22px; }
+      .card h2 { font-size: 15.5px; font-weight: 600; margin: 0; letter-spacing: -0.005em; }
+      .card .card-sub { color: var(--muted); font-size: 13px; margin: 3px 0 0; }
+      .card-head { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+      .section { margin-top: 18px; }
+      .grid-hero { display: grid; grid-template-columns: 1.65fr 1fr; gap: 18px; }
+      .grid-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 18px; }
+      .grid-charts { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 18px; margin-top: 18px; }
+      .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+
+      /* ---------- hero usage ---------- */
+      .usage-big { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+      .usage-pct { font-size: 52px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+      .usage-of { color: var(--muted); font-size: 15px; }
+      .usage-of strong { color: var(--text); }
+      .usage-note { color: var(--muted); font-size: 13.5px; margin: 8px 0 0; max-width: 56ch; }
+      .bar {
+        display: flex; height: 16px; border-radius: 6px; overflow: hidden;
+        background: var(--track); margin: 18px 0 10px; position: relative;
+      }
+      .bar > div { height: 100%; transition: width 0.5s ease; min-width: 0; }
+      .bar .proj-marker {
+        position: absolute; top: -3px; bottom: -3px; width: 2px;
+        background: var(--text); opacity: 0.85;
+      }
+      .bar .proj-marker::after {
+        content: "after fixes"; position: absolute; top: -17px; left: 50%;
+        transform: translateX(-50%); font-size: 10.5px; color: var(--muted);
+        white-space: nowrap; font-family: "IBM Plex Mono", monospace;
+      }
+      .bar-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--muted); margin-top: 22px; }
+      .bar-legend .sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 6px; vertical-align: -1px; }
+      .pace-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+      .pace-chip {
+        font-size: 12.5px; padding: 6px 11px; border-radius: 8px;
+        background: var(--panel-2); border: 1px solid var(--border-soft); color: var(--muted);
+      }
+      .pace-chip strong { color: var(--text); font-weight: 600; }
+      .pace-chip.warn { background: var(--amber-dim); color: var(--amber); border-color: transparent; }
+      .pace-chip.warn strong { color: var(--amber); }
+
+      /* reset panel */
+      .reset-when { font-size: 13px; color: var(--muted); margin: 0; }
+      .reset-count { font-size: 34px; font-weight: 600; letter-spacing: 0.01em; line-height: 1.1; margin: 2px 0 2px; font-variant-numeric: tabular-nums; }
+      .reset-date { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+      .reset-alert {
+        display: flex; gap: 10px; background: var(--amber-dim); border-radius: 10px;
+        padding: 11px 13px; font-size: 13px; color: var(--text); margin-bottom: 14px;
+      }
+      .reset-alert svg { flex: none; margin-top: 1px; }
+      .reset-alert strong { color: var(--amber); }
+      .reset-history { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+      .reset-history li {
+        display: flex; justify-content: space-between; gap: 10px;
+        padding: 8px 0; border-top: 1px solid var(--border-soft); color: var(--muted);
+      }
+      .reset-history li:first-child { border-top: 0; }
+      .reset-history .ok { color: var(--teal); font-weight: 600; }
+      .reset-history .late { color: var(--red); font-weight: 600; }
+
+      /* ---------- KPIs ---------- */
+      .kpi { padding: 16px 18px; }
+      .kpi .k-label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin: 0 0 6px; }
+      .kpi .k-value { font-size: 30px; font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; }
+      .kpi .k-value small { font-size: 15px; color: var(--muted); font-weight: 500; }
+      .kpi .k-note { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+      .kpi .k-note strong { color: var(--text); }
+      .delta { font-weight: 600; font-size: 12.5px; }
+      .delta.up { color: var(--red); }
+      .delta.down { color: var(--teal); }
+
+      /* ---------- charts ---------- */
+      .chart-wrap { position: relative; }
+      .chart-wrap svg { display: block; width: 100%; height: auto; }
+      .chart-legend { display: flex; flex-wrap: wrap; gap: 5px 16px; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+      .chart-legend button {
+        appearance: none; border: 0; background: none; font: inherit; color: inherit;
+        cursor: pointer; padding: 2px 4px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;
+      }
+      .chart-legend button:hover { color: var(--text); }
+      .chart-legend button.active { color: var(--text); background: var(--panel-2); box-shadow: inset 0 0 0 1px var(--border); }
+      .chart-legend .sw { width: 10px; height: 10px; border-radius: 3px; }
+      #tooltip {
+        position: fixed; z-index: 50; pointer-events: none; display: none;
+        background: var(--panel-3); border: 1px solid var(--border); border-radius: 9px;
+        padding: 9px 12px; font-size: 12.5px; box-shadow: var(--shadow); max-width: 260px;
+      }
+      #tooltip .tt-title { font-weight: 600; margin-bottom: 3px; }
+      #tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); }
+      #tooltip .tt-row strong { color: var(--text); font-weight: 600; }
+
+      .donut-flex { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+      .donut-box { position: relative; flex: none; width: 156px; height: 156px; margin: 0 auto; }
+      .donut-center {
+        position: absolute; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; text-align: center; pointer-events: none;
+      }
+      .donut-center .dc-big { font-size: 24px; font-weight: 700; line-height: 1; }
+      .donut-center .dc-small { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+      .donut-list { flex: 1; min-width: 0; }
+      .donut-row {
+        display: flex; align-items: center; gap: 9px; width: 100%;
+        appearance: none; border: 0; background: none; font: inherit; text-align: left;
+        padding: 8px 8px; border-radius: 9px; cursor: pointer; color: var(--text);
+      }
+      .donut-row:hover { background: var(--panel-2); }
+      .donut-row.active { background: var(--panel-2); box-shadow: inset 0 0 0 1px var(--border); }
+      .donut-row .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+      .donut-row .d-name { flex: 1; min-width: 0; font-size: 13.5px; overflow: hidden; }
+      .donut-row .d-name span { display: block; color: var(--faint); font-size: 11.5px; }
+      .donut-row .d-val { font-weight: 600; font-size: 13.5px; text-align: right; flex: none; }
+      .donut-row .d-val span { display: block; color: var(--muted); font-weight: 400; font-size: 11.5px; }
+      .filter-note { font-size: 12.5px; color: var(--amber); margin-top: 10px; display: none; }
+      .filter-note button { appearance: none; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; }
+
+      /* ---------- toolbar / tables ---------- */
+      .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 26px 0 12px; }
+      .toolbar h2 { font-size: 19px; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+      .toolbar p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+      .search {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 0 12px;
+      }
+      .search input {
+        appearance: none; border: 0; background: none; color: var(--text); font: inherit;
+        font-size: 13.5px; padding: 9px 0; width: 190px; outline: none;
+      }
+      .search input::placeholder { color: var(--faint); }
+      table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+      thead th {
+        text-align: left; font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em;
+        text-transform: uppercase; color: var(--faint); padding: 4px 12px 10px;
+        border-bottom: 1px solid var(--border-soft); white-space: nowrap;
+      }
+      thead th.num, tbody td.num { text-align: right; }
+      thead th.sortable { cursor: pointer; user-select: none; }
+      thead th.sortable:hover { color: var(--muted); }
+      tbody td { padding: 13px 12px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+      tbody tr:last-child td { border-bottom: 0; }
+      tbody tr.main-row { cursor: pointer; }
+      tbody tr.main-row:hover td { background: var(--panel-2); }
+      .item-name { font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .item-sub { color: var(--faint); font-size: 12px; margin-top: 2px; }
+      .flag {
+        display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700;
+        letter-spacing: 0.03em; padding: 2.5px 8px; border-radius: 999px; white-space: nowrap;
+      }
+      .flag.hog { background: var(--red-dim); color: var(--red); }
+      .flag.bloat { background: var(--amber-dim); color: var(--amber); }
+      .share-bar { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+      .share-track { width: 74px; height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; flex: none; }
+      .share-fill { height: 100%; border-radius: 3px; }
+      .detail-row td { background: var(--bg-soft); padding: 16px 14px 18px; }
+      .detail-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 18px; }
+      .detail-grid h4 { margin: 0 0 8px; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+      .detail-stat { font-size: 13px; color: var(--muted); margin: 0 0 5px; }
+      .detail-stat strong { color: var(--text); }
+      .mini-bars { display: flex; align-items: flex-end; gap: 4px; height: 56px; }
+      .mini-bars .mb { flex: 1; border-radius: 3px 3px 0 0; min-height: 3px; }
+      .mini-labels { display: flex; gap: 4px; margin-top: 5px; font-size: 10px; color: var(--faint); }
+      .mini-labels span { flex: 1; text-align: center; }
+      .tax-bar { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; display: flex; margin: 6px 0 4px; }
+      .empty-row td { text-align: center; color: var(--faint); padding: 26px 12px; }
+
+      /* ---------- models ---------- */
+      .model-vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+      .model-card { border: 1px solid var(--border-soft); border-radius: 12px; padding: 16px; background: var(--panel-2); }
+      .model-card h3 { margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+      .model-card .m-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; }
+      .model-card .m-rate { font-size: 27px; font-weight: 700; margin: 10px 0 0; line-height: 1; white-space: nowrap; }
+      .model-card .m-rate small { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+      .model-card ul { list-style: none; margin: 12px 0 0; padding: 0; font-size: 13px; color: var(--muted); }
+      .model-card li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border-soft); }
+      .model-card li strong { color: var(--text); font-weight: 600; }
+      .vs-badge { align-self: center; font-weight: 700; font-size: 12px; color: var(--muted); background: var(--panel-3); border: 1px solid var(--border); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+      .spend-split { margin-top: 16px; }
+      .spend-split .ss-labels { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+      .spend-split .ss-labels strong { color: var(--text); }
+      .model-warn { display: flex; gap: 10px; margin-top: 14px; font-size: 13px; background: var(--amber-dim); border-radius: 10px; padding: 11px 13px; }
+      .model-warn svg { flex: none; margin-top: 1px; }
+
+      /* ---------- recommendations ---------- */
+      .rec {
+        display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid var(--border-soft);
+        align-items: flex-start;
+      }
+      .rec:first-of-type { border-top: 0; padding-top: 4px; }
+      .rec-icon {
+        flex: none; width: 36px; height: 36px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--teal-dim); color: var(--teal);
+      }
+      .rec-body { flex: 1 1 200px; min-width: 0; }
+      .rec-body h3 { margin: 0; font-size: 14.5px; font-weight: 600; }
+      .rec-body p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+      .rec-save { text-align: right; flex: none; }
+      .rec-save .rs-big { font-size: 19px; font-weight: 700; color: var(--teal); line-height: 1.1; }
+      .rec-save .rs-small { font-size: 11.5px; color: var(--muted); }
+      .btn {
+        appearance: none; border: 1px solid var(--border); background: var(--panel-2);
+        color: var(--text); font: inherit; font-size: 13px; font-weight: 600;
+        padding: 7px 14px; border-radius: 9px; cursor: pointer; margin-top: 8px; white-space: nowrap;
+      }
+      .btn:hover { background: var(--panel-3); }
+      .btn.applied { background: var(--teal-dim); border-color: transparent; color: var(--teal); cursor: default; }
+      .rec-total {
+        display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between;
+        background: var(--panel-2); border: 1px solid var(--border-soft); border-radius: 11px;
+        padding: 13px 16px; margin-top: 8px; font-size: 13.5px;
+      }
+      .rec-total strong { color: var(--teal); }
+
+      footer { margin-top: 30px; color: var(--faint); font-size: 12.5px; text-align: center; }
+      .hidden { display: none !important; }
+
+      /* ---------- responsive ---------- */
+      @media (max-width: 980px) {
+        .grid-hero, .grid-charts, .grid-two { grid-template-columns: 1fr; }
+        .grid-kpis { grid-template-columns: repeat(2, 1fr); }
+        .detail-grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 680px) {
+        .wrap { padding: 16px 13px 44px; }
+        .usage-pct { font-size: 42px; }
+        .reset-count { font-size: 27px; }
+        .donut-flex { flex-direction: column; align-items: stretch; }
+        .donut-box { margin: 0 auto; }
+        .model-vs { grid-template-columns: 1fr; }
+        .vs-badge { margin: 0 auto; }
+        .search input { width: 150px; }
+        table, thead, tbody, tr, td { display: block; }
+        thead { display: none; }
+        tbody tr.main-row { padding: 6px 0; border-bottom: 1px solid var(--border-soft); }
+        tbody td { border-bottom: 0; padding: 5px 12px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+        tbody td::before { content: attr(data-label); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); flex: none; }
+        tbody td.cell-name { display: block; }
+        tbody td.cell-name::before { display: none; }
+        .share-bar { justify-content: flex-end; }
+        .detail-row td { display: block; }
+        .detail-row td::before { display: none; }
+        .rec { flex-wrap: wrap; }
+        .rec-save { text-align: left; display: flex; align-items: center; gap: 12px; }
+        .rec-save .btn { margin-top: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bar > div { transition: none; }
+      }
+
+      /* ---------- manual entry form ---------- */
+      .entry-form { margin-bottom: 22px; }
+      .entry-form h2 { margin: 0 0 4px; font-size: 17px; }
+      .entry-form .form-sub { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+      .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+      .form-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+      .form-field input, .form-field select {
+        width: 100%; padding: 9px 12px; border-radius: 9px;
+        border: 1px solid var(--border); background: var(--bg-soft);
+        color: var(--text); font-size: 14px; font-family: inherit;
+      }
+      .form-field input:focus, .form-field select:focus { outline: 2px solid var(--teal); border-color: var(--teal); }
+      .entry-list { margin: 0 0 10px; }
+      .entry-row { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-soft); font-size: 14px; }
+      .entry-row .grow { flex: 1; }
+      .entry-row .rm { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 2px 6px; }
+      .entry-row .est { color: var(--muted); font-size: 12px; }
+      .form-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+      .btn {
+        padding: 9px 18px; border-radius: 9px; border: 1px solid var(--border);
+        background: var(--panel-3); color: var(--text); font-size: 14px;
+        font-weight: 600; cursor: pointer; font-family: inherit;
+      }
+      .btn:hover { border-color: var(--teal); }
+      .btn-primary { background: var(--teal); color: #062a24; border-color: var(--teal); }
+      .btn-primary:hover { filter: brightness(1.08); }
+      .btn-ghost { background: transparent; }
+      .form-note { font-size: 12px; color: var(--faint); margin-top: 10px; }
+      .collapse-toggle { cursor: pointer; user-select: none; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="topbar">
+        <div>
+          <h1>Usage</h1>
+          <p class="sub" id="periodSub">Week of Oct 13 – Oct 20, 2026 · All figures in credits</p>
+        </div>
+        <div class="top-actions">
+          <span class="badge plan">Free plan · Weekly limit</span>
+          <span class="badge"><span class="dot"></span>Your data</span>
+          <span class="countdown-chip" title="Time until your weekly usage resets">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+            Reset in <strong class="mono" id="countdownChip">—</strong>
+          </span>
+          <div class="seg" role="group" aria-label="Period">
+            <button type="button" data-period="this" aria-pressed="true">This week</button>
+            <button type="button" data-period="last" aria-pressed="false">Last week</button>
+            <button type="button" data-period="compare" aria-pressed="false">Compare</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- MANUAL ENTRY -->
+      <section class="card card-pad entry-form" aria-label="Enter your usage data" id="entryForm">
+        <h2 class="collapse-toggle" id="formToggle">Enter your numbers <span style="color:var(--faint);font-weight:400;font-size:13px;">(click to collapse)</span></h2>
+        <p class="form-sub">No API exists for consumer usage data on any platform, so Usage Lens works from numbers you enter plus documented estimation heuristics. Takes about 60 seconds. Everything stays in your browser.</p>
+        <div id="formBody">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="inPlatform">Platform</label>
+              <select id="inPlatform">
+                <option>Muse</option>
+                <option>ChatGPT</option>
+                <option>Claude</option>
+                <option>Gemini</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="inPct">Usage so far (%)</label>
+              <input type="number" id="inPct" min="0" max="100" step="0.1" placeholder="e.g. 68.5" />
+            </div>
+            <div class="form-field">
+              <label for="inLimit">Weekly credit limit</label>
+              <input type="number" id="inLimit" min="1" step="1" placeholder="e.g. 2500" />
+            </div>
+            <div class="form-field">
+              <label for="inReset">Reset date and time</label>
+              <input type="datetime-local" id="inReset" />
+            </div>
+          </div>
+          <h2 style="font-size:15px;margin:14px 0 6px;">Your automations</h2>
+          <p class="form-sub">Scheduled jobs, hooks, background tasks. The estimator multiplies model rate by tokens per run by runs per week. See ESTIMATION.md for the math.</p>
+          <div class="form-grid">
+            <div class="form-field"><label for="autoName">Name</label><input type="text" id="autoName" placeholder="e.g. Morning briefing" /></div>
+            <div class="form-field"><label for="autoModel">Model tier</label><select id="autoModel"><option value="spark">Spark (1.9 cr/resp)</option><option value="wonder">Wonder (6.1 cr/resp)</option><option value="custom">Custom rate</option></select></div>
+            <div class="form-field"><label for="autoRuns">Runs per week</label><input type="number" id="autoRuns" min="1" step="1" placeholder="e.g. 7" /></div>
+            <div class="form-field"><label for="autoTokens">Est. tokens per run</label><input type="number" id="autoTokens" min="1" step="100" placeholder="e.g. 8000" /></div>
+          </div>
+          <div class="form-actions"><button type="button" class="btn" id="addAuto">Add automation</button></div>
+          <div class="entry-list" id="autoList"></div>
+          <h2 style="font-size:15px;margin:14px 0 6px;">Your side chats</h2>
+          <p class="form-sub">Conversations that re-read history on every call. Context tax = messages times average tokens per message, re-read every call.</p>
+          <div class="form-grid">
+            <div class="form-field"><label for="chatName">Chat name</label><input type="text" id="chatName" placeholder="e.g. Podcast production" /></div>
+            <div class="form-field"><label for="chatMsgs">Messages in history</label><input type="number" id="chatMsgs" min="1" step="1" placeholder="e.g. 240" /></div>
+            <div class="form-field"><label for="chatCalls">Calls per week</label><input type="number" id="chatCalls" min="1" step="1" placeholder="e.g. 12" /></div>
+          </div>
+          <div class="form-actions"><button type="button" class="btn" id="addChat">Add side chat</button></div>
+          <div class="entry-list" id="chatList"></div>
+          <div class="form-actions" style="margin-top:16px;">
+            <button type="button" class="btn btn-primary" id="saveData">Save and update dashboard</button>
+            <button type="button" class="btn btn-ghost" id="clearData">Clear my data</button>
+          </div>
+          <p class="form-note">Estimates are labeled as estimates and the math is shown in ESTIMATION.md. Override any estimate by editing the numbers. Nothing is sent anywhere; this page runs entirely in your browser.</p>
+        </div>
+      </section>
+
+      <!-- HERO -->
+      <div class="grid-hero">
+        <section class="card card-pad" aria-label="Total usage">
+          <div class="usage-big">
+            <span class="usage-pct mono" id="usagePct">—</span>
+            <span class="usage-of">of weekly limit used<br /><strong class="mono" id="usageCredits">—</strong></span>
+          </div>
+          <p class="usage-note" id="usageNote"></p>
+          <div class="bar" id="usageBar" role="img" aria-label="Usage by category"></div>
+          <div class="bar-legend" id="usageBarLegend"></div>
+          <div class="pace-row" id="paceRow"></div>
+        </section>
+
+        <section class="card card-pad" aria-label="Reset schedule">
+          <p class="reset-when">Weekly usage resets</p>
+          <p class="reset-count mono" id="countdownBig">—</p>
+          <p class="reset-date" id="resetDateLine"></p>
+          <div class="reset-alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0b24a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13.5"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span><strong>Reset moved +3 days.</strong> This cycle was first shown as resetting Oct 17. It now lands Oct 20 — no explanation was given.</span>
+          </div>
+          <ul class="reset-history">
+            <li><span>Tue, Oct 20 · 5:30 PM CDT</span><span style="color:var(--amber);font-weight:600;">Shifted +3d</span></li>
+            <li><span>Tue, Oct 13 · 5:30 PM CDT</span><span class="ok">On time</span></li>
+            <li><span>Tue, Oct 6 · 5:30 PM CDT</span><span class="ok">On time</span></li>
+            <li><span>Tue, Sep 29 · 5:30 PM CDT</span><span class="late">2 days late</span></li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- KPIs -->
+      <div class="grid-kpis" id="kpiRow"></div>
+
+      <!-- CHARTS -->
+      <div class="grid-charts">
+        <section class="card card-pad" aria-label="Daily usage chart">
+          <div class="card-head">
+            <div>
+              <h2>Daily burn</h2>
+              <p class="card-sub" id="dailySub">Credits per day, stacked by source</p>
+            </div>
+            <span class="badge mono" id="dailyAvg"></span>
+          </div>
+          <div class="chart-wrap" id="dailyChart"></div>
+          <div class="chart-legend" id="dailyLegend"></div>
+        </section>
+
+        <section class="card card-pad" aria-label="Breakdown by category">
+          <div class="card-head">
+            <div>
+              <h2>Where it went</h2>
+              <p class="card-sub">Tap a category to filter the tables below</p>
+            </div>
+          </div>
+          <div class="donut-flex">
+            <div class="donut-box">
+              <div id="donutChart"></div>
+              <div class="donut-center">
+                <span class="dc-big mono" id="donutTotal">—</span>
+                <span class="dc-small">credits used</span>
+              </div>
+            </div>
+            <div class="donut-list" id="donutList"></div>
+          </div>
+          <p class="filter-note" id="filterNote">Filtered to <strong id="filterName"></strong>. <button type="button" id="clearFilter">Show everything</button></p>
+        </section>
+      </div>
+
+      <!-- TABLES -->
+      <div class="toolbar">
+        <div>
+          <h2>Biggest consumers</h2>
+          <p>Every automation, side chat, and model task — accounted for. Tap a row for the daily detail.</p>
+        </div>
+        <label class="search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#627184" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+          <input type="search" id="searchInput" placeholder="Find a consumer…" aria-label="Search consumers" />
+        </label>
+      </div>
+
+      <section class="card card-pad section" id="secAutomations" aria-label="Automations">
+        <div class="card-head">
+          <div>
+            <h2>Scheduled jobs &amp; automations</h2>
+            <p class="card-sub">These run whether you're watching or not — the invisible background burn.</p>
+          </div>
+          <span class="badge mono" id="autoTotalBadge"></span>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Automation</th><th class="num">Runs</th><th class="num">Per run</th>
+            <th class="num sortable" data-sort-table="auto" data-sort-key="total">Total credits ↕</th>
+            <th class="num">Share of week</th><th class="num" id="autoDeltaHead">vs last wk</th>
+          </tr></thead>
+          <tbody id="autoBody"></tbody>
+        </table>
+      </section>
+
+      <section class="card card-pad section" id="secChats" aria-label="Side chats">
+        <div class="card-head">
+          <div>
+            <h2>Side chats — the context tax</h2>
+            <p class="card-sub" id="chatSub">Every message in a side chat re-sends its entire history as context. Long chats tax every single call.</p>
+          </div>
+          <span class="badge mono" id="chatTotalBadge"></span>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Side chat</th><th class="num">History carried</th><th class="num">Calls</th>
+            <th class="num sortable" data-sort-table="chat" data-sort-key="total">Total credits ↕</th>
+            <th class="num">Share of week</th><th class="num" id="chatDeltaHead">vs last wk</th>
+          </tr></thead>
+          <tbody id="chatBody"></tbody>
+        </table>
+      </section>
+
+      <div class="grid-two">
+        <section class="card card-pad" id="secMain" aria-label="Main chat">
+          <div class="card-head">
+            <div>
+              <h2>Main chat</h2>
+              <p class="card-sub">Your primary conversation — the only usage you can actually see happening.</p>
+            </div>
+            <span class="badge mono" id="mainTotalBadge"></span>
+          </div>
+          <div id="mainStats"></div>
+        </section>
+
+        <section class="card card-pad" id="secTasks" aria-label="Model calls and subagent tasks">
+          <div class="card-head">
+            <div>
+              <h2>Model calls &amp; subagent tasks</h2>
+              <p class="card-sub">One-off heavy jobs spawned from your chats.</p>
+            </div>
+            <span class="badge mono" id="taskTotalBadge"></span>
+          </div>
+          <table>
+            <thead><tr><th>Task</th><th>Model</th><th class="num">Credits</th><th class="num">Share</th></tr></thead>
+            <tbody id="taskBody"></tbody>
+          </table>
+        </section>
+      </div>
+
+      <!-- MODELS + RECOMMENDATIONS -->
+      <div class="grid-two">
+        <section class="card card-pad" aria-label="Model comparison">
+          <div class="card-head">
+            <div>
+              <h2>Spark vs Wonder</h2>
+              <p class="card-sub">Same questions, very different burn. Nothing warns you at switch time — this does.</p>
+            </div>
+          </div>
+          <div class="model-vs">
+            <div class="model-card">
+              <h3>Spark <span class="m-tag" style="background:var(--teal-dim);color:var(--teal);">EVERYDAY</span></h3>
+              <p class="m-rate mono">1.9 <small>credits / response</small></p>
+              <ul>
+                <li>Responses this week <strong class="mono" id="sparkResp">—</strong></li>
+                <li>Share of responses <strong class="mono">79%</strong></li>
+                <li>Share of model spend <strong class="mono">54%</strong></li>
+                <li>Best for <strong>Lookups, drafts, chat</strong></li>
+              </ul>
+            </div>
+            <div class="vs-badge">3.2×</div>
+            <div class="model-card">
+              <h3>Wonder <span class="m-tag" style="background:var(--amber-dim);color:var(--amber);">DEEP WORK</span></h3>
+              <p class="m-rate mono">6.1 <small>credits / response</small></p>
+              <ul>
+                <li>Responses this week <strong class="mono" id="wonderResp">—</strong></li>
+                <li>Share of responses <strong class="mono">21%</strong></li>
+                <li>Share of model spend <strong class="mono">46%</strong></li>
+                <li>Best for <strong>Research, builds, analysis</strong></li>
+              </ul>
+            </div>
+          </div>
+          <div class="spend-split">
+            <div class="ss-labels"><span>Spark spend <strong>54%</strong></span><span>Wonder spend <strong>46%</strong></span></div>
+            <div class="bar" style="margin:0;height:12px;">
+              <div style="width:54%;background:var(--teal);"></div>
+              <div style="width:46%;background:var(--violet);"></div>
+            </div>
+          </div>
+          <div class="model-warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0b24a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13.5"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span><strong>21% of responses ate 46% of model spend.</strong> 41 of this week's Wonder responses were one-line lookups Spark handles for a third of the cost.</span>
+          </div>
+        </section>
+
+        <section class="card card-pad" aria-label="Recommendations">
+          <div class="card-head">
+            <div>
+              <h2>Cut the burn</h2>
+              <p class="card-sub">Fixes ranked by savings. Applying one updates your projected usage above.</p>
+            </div>
+          </div>
+          <div id="recList"></div>
+          <div class="rec-total">
+            <span>Projected savings if you apply everything</span>
+            <strong class="mono" id="recTotalLine">—</strong>
+          </div>
+        </section>
+      </div>
+
+      <footer>Enter your numbers above. Estimates use the heuristics in ESTIMATION.md. No data leaves your browser. Usage Lens is free and open source (MIT).</footer>
+    </div>
+
+    <div id="tooltip" role="tooltip"></div>
+
+    <script>
+      "use strict";
+
+      /* ================= sample data ================= */
+      var CATS = {
+        auto:  { key: "auto",  name: "Automations",    sub: "Scheduled jobs & hooks",   color: "var(--amber)",  hex: "#f0b24a" },
+        side:  { key: "side",  name: "Side chats",     sub: "Context tax on every call", color: "var(--sky)",    hex: "#4cc3ff" },
+        main:  { key: "main",  name: "Main chat",      sub: "Your primary conversation", color: "var(--teal)",   hex: "#2fd6b5" },
+        model: { key: "model", name: "Model calls",   sub: "Subagents & one-off tasks", color: "var(--violet)", hex: "#a78bfa" }
+      };
+      var CAT_ORDER = ["auto", "side", "main", "model"];
+      var DAY_LABELS = ["Tue 13", "Wed 14", "Thu 15", "Fri 16", "Sat 17", "Sun 18", "Mon 19"];
+      var DAY_LABELS_LAST = ["Tue 6", "Wed 7", "Thu 8", "Fri 9", "Sat 10", "Sun 11", "Mon 12"];
+
+      var WEEKS = {
+        this: {
+          rangeLabel: "Week of Oct 13 – Oct 20, 2026 · All figures in credits",
+          dayTotalsNote: "Credits per day, stacked by source",
+          labels: DAY_LABELS,
+          limit: 2500,
+          daily: [
+            { auto: 78,  side: 62,  main: 44, model: 28 },
+            { auto: 96,  side: 88,  main: 52, model: 32 },
+            { auto: 84,  side: 74,  main: 48, model: 38 },
+            { auto: 102, side: 96,  main: 54, model: 39 },
+            { auto: 88,  side: 70,  main: 46, model: 32 },
+            { auto: 66,  side: 58,  main: 38, model: 27 },
+            { auto: 98,  side: 100, main: 59, model: 16 }
+          ],
+          automations: [
+            { id: "brain", name: "Digital Brain daily sync", schedule: "Daily · 8:52 AM", runs: 7, perRun: 38, total: 266, lastRun: "Today, 8:52 AM", nextRun: "Tomorrow, 8:52 AM", trend: [34, 38, 36, 40, 38, 36, 44], note: "Re-reads your full notes library on every run instead of only what changed." },
+            { id: "vault", name: "Vault log nightly write", schedule: "Daily · 8:52 PM", runs: 7, perRun: 21, total: 147, lastRun: "Yesterday, 8:52 PM", nextRun: "Today, 8:52 PM", trend: [21, 21, 21, 21, 21, 21, 21], note: "Overlaps with the Digital Brain sync — both summarize the same day's activity." },
+            { id: "igpost", name: "Instagram morning post", schedule: "Daily · 7:00 AM", runs: 7, perRun: 17, total: 119, lastRun: "Today, 7:00 AM", nextRun: "Tomorrow, 7:00 AM", trend: [15, 17, 19, 17, 15, 17, 19], note: "Includes a duplicate publish + retry on Oct 19 that doubled one morning's cost." },
+            { id: "carwatch", name: "Marketplace car watch", schedule: "Daily · 9:00 AM", runs: 7, perRun: 8, total: 56, lastRun: "Today, 9:00 AM", nextRun: "Tomorrow, 9:00 AM", trend: [8, 8, 8, 8, 8, 8, 8], note: "Cheap and steady. Scans new listings against a fixed checklist." },
+            { id: "triage", name: "Email triage sweep", schedule: "Mon & Thu · 6:00 AM", runs: 2, perRun: 12, total: 24, lastRun: "Mon, 6:00 AM", nextRun: "Thu, 6:00 AM", trend: [0, 12, 0, 0, 12, 0, 0], note: "Only runs twice a week. The cheapest automation you own." }
+          ],
+          chats: [
+            { id: "podcast", name: "Podcast production", context: 182400, calls: 96, total: 214, messages: 1240, age: "6 weeks old", historyShare: 89, trend: [26, 30, 28, 34, 30, 28, 38], note: "Started for episode 12. Still carrying every script draft since episode 1." },
+            { id: "city", name: "Graffiti City builder", context: 121800, calls: 61, total: 148, messages: 864, age: "4 weeks old", historyShare: 84, trend: [18, 22, 20, 24, 20, 18, 26], note: "Long build discussions plus full scene specs re-sent on every call." },
+            { id: "maestro", name: "Maestro research", context: 74300, calls: 44, total: 96, messages: 512, age: "3 weeks old", historyShare: 78, trend: [12, 14, 13, 15, 13, 13, 16], note: "Document-heavy thread. The evidence summaries alone are 31k tokens." },
+            { id: "housing", name: "Housing search — Hot Springs", context: 41200, calls: 38, total: 58, messages: 296, age: "2 weeks old", historyShare: 71, trend: [7, 9, 8, 9, 8, 7, 10], note: "Listing details for homes you've already ruled out are still in context." },
+            { id: "lab", name: "Tha Lab analysis", context: 28900, calls: 12, total: 32, messages: 148, age: "5 weeks old", historyShare: 66, trend: [4, 5, 4, 5, 4, 4, 6], note: "Mostly idle — but every rare call still pays for the full history." }
+          ],
+          tasks: [
+            { name: "Deep research — housing market scan", model: "Wonder", total: 88, when: "Sun, Oct 18" },
+            { name: "Image batch — Mote sprite variants", model: "Spark", total: 64, when: "Thu, Oct 15" },
+            { name: "Board review — dashboard proposal", model: "Wonder", total: 60, when: "Mon, Oct 19" }
+          ],
+          mainChat: { total: 341, messages: 214, avgPerMsg: 1.6, longestThread: "86 messages", peakDay: "Mon 19 (today)" },
+          models: { sparkResp: 402, wonderResp: 106 }
+        },
+        last: {
+          rangeLabel: "Week of Oct 6 – Oct 13, 2026 · All figures in credits",
+          dayTotalsNote: "Credits per day, stacked by source",
+          labels: DAY_LABELS_LAST,
+          limit: 2500,
+          daily: [
+            { auto: 66, side: 48, main: 42, model: 16 },
+            { auto: 78, side: 55, main: 48, model: 24 },
+            { auto: 72, side: 52, main: 46, model: 26 },
+            { auto: 84, side: 63, main: 55, model: 36 },
+            { auto: 79, side: 58, main: 51, model: 26 },
+            { auto: 58, side: 44, main: 39, model: 17 },
+            { auto: 84, side: 82, main: 75, model: 65 }
+          ],
+          automations: [
+            { id: "brain", name: "Digital Brain daily sync", schedule: "Daily · 8:52 AM", runs: 7, perRun: 33, total: 231, lastRun: "—", nextRun: "—", trend: [30, 33, 31, 34, 33, 32, 38], note: "" },
+            { id: "vault", name: "Vault log nightly write", schedule: "Daily · 8:52 PM", runs: 7, perRun: 19, total: 133, lastRun: "—", nextRun: "—", trend: [19, 19, 19, 19, 19, 19, 19], note: "" },
+            { id: "igpost", name: "Instagram morning post", schedule: "Daily · 7:00 AM", runs: 7, perRun: 15, total: 105, lastRun: "—", nextRun: "—", trend: [13, 15, 16, 15, 14, 15, 17], note: "" },
+            { id: "carwatch", name: "Marketplace car watch", schedule: "Daily · 9:00 AM", runs: 7, perRun: 6, total: 42, lastRun: "—", nextRun: "—", trend: [6, 6, 6, 6, 6, 6, 6], note: "" },
+            { id: "triage", name: "Email triage sweep", schedule: "Mon & Thu · 6:00 AM", runs: 1, perRun: 10, total: 10, lastRun: "—", nextRun: "—", trend: [0, 10, 0, 0, 0, 0, 0], note: "" }
+          ],
+          chats: [
+            { id: "podcast", name: "Podcast production", context: 158900, calls: 78, total: 168, messages: 1044, age: "5 weeks old", historyShare: 86, trend: [20, 24, 22, 26, 24, 22, 30], note: "" },
+            { id: "city", name: "Graffiti City builder", context: 98400, calls: 47, total: 104, messages: 703, age: "3 weeks old", historyShare: 80, trend: [12, 15, 14, 17, 15, 13, 18], note: "" },
+            { id: "maestro", name: "Maestro research", context: 61200, calls: 35, total: 71, messages: 421, age: "2 weeks old", historyShare: 74, trend: [9, 10, 10, 11, 10, 9, 12], note: "" },
+            { id: "housing", name: "Housing search — Hot Springs", context: 29800, calls: 21, total: 34, messages: 188, age: "1 week old", historyShare: 64, trend: [4, 5, 5, 6, 5, 4, 5], note: "" },
+            { id: "lab", name: "Tha Lab analysis", context: 27400, calls: 10, total: 25, messages: 136, age: "4 weeks old", historyShare: 63, trend: [3, 4, 3, 4, 4, 3, 4], note: "" }
+          ],
+          tasks: [
+            { name: "Deep research — scholarship scan", model: "Wonder", total: 74, when: "Sun, Oct 11" },
+            { name: "Image batch — avatar concepts", model: "Spark", total: 58, when: "Wed, Oct 7" },
+            { name: "Board review — Q4 plan", model: "Wonder", total: 78, when: "Mon, Oct 12" }
+          ],
+          mainChat: { total: 356, messages: 231, avgPerMsg: 1.5, longestThread: "64 messages", peakDay: "Mon 12" },
+          models: { sparkResp: 388, wonderResp: 92 }
+        }
+      };
+
+      var RECS = [
+        { id: "rec-podcast", title: "Archive “Podcast production” and start fresh", body: "It carries 182,400 tokens of history into every call — 89% of each call is re-reading old scripts. Archive it, pin a one-page summary, and start a clean chat.", save: 154 },
+        { id: "rec-brain", title: "Make Digital Brain sync incremental", body: "It re-reads your entire notes library daily. Switching to changed-files-only keeps the same result for a fraction of the context.", save: 118 },
+        { id: "rec-wonder", title: "Route one-line lookups to Spark", body: "41 of this week's 106 Wonder responses were simple lookups. Spark answers those at 1.9 credits instead of 6.1 — same answer, a third of the burn.", save: 172 },
+        { id: "rec-merge", title: "Merge the Vault log into the Brain sync", body: "Two nightly jobs summarize the same day's activity. One combined job does both jobs' work in a single pass.", save: 52 }
+      ];
+
+      var CYCLE_START = new Date("2026-10-13T17:30:00-05:00").getTime();
+      var RESET_AT = new Date("2026-10-20T17:30:00-05:00").getTime();
+
+      /* ================= state ================= */
+      var state = {
+        period: "this",            // this | last | compare
+        filter: null,              // category key or null
+        query: "",
+        applied: {},               // rec id -> true
+        expanded: {},              // row id -> true
+        sortDir: { auto: -1, chat: -1 }
+      };
+
+      /* ================= helpers ================= */
+      function $(id) { return document.getElementById(id); }
+      function fmt(n) { return n.toLocaleString("en-US"); }
+      function fmtTok(n) { return n >= 1000 ? (Math.round(n / 100) / 10).toLocaleString("en-US") + "k" : String(n); }
+      function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+      function week() { return WEEKS[state.period === "last" ? "last" : "this"]; }
+      function catTotals(w) {
+        var t = { auto: 0, side: 0, main: 0, model: 0 };
+        w.daily.forEach(function (d) { CAT_ORDER.forEach(function (k) { t[k] += d[k]; }); });
+        return t;
+      }
+      function totalUsed(w) { var t = catTotals(w); return t.auto + t.side + t.main + t.model; }
+      function appliedSavings() {
+        var s = 0;
+        RECS.forEach(function (r) { if (state.applied[r.id]) s += r.save; });
+        return s;
+      }
+      function deltaPct(cur, prev) {
+        if (!prev) return null;
+        return Math.round(((cur - prev) / prev) * 1000) / 10;
+      }
+      function deltaHTML(cur, prev, invert) {
+        var d = deltaPct(cur, prev);
+        if (d === null) return '<span style="color:var(--faint)">—</span>';
+        if (d === 0) return '<span style="color:var(--muted)">±0%</span>';
+        var worse = invert ? d < 0 : d > 0;
+        var arrow = d > 0 ? "▲" : "▼";
+        return '<span class="delta ' + (worse ? "up" : "down") + '">' + arrow + " " + Math.abs(d) + "%</span>";
+      }
+
+      var tooltip = $("tooltip");
+      function showTip(html, x, y) {
+        tooltip.innerHTML = html;
+        tooltip.style.display = "block";
+        var r = tooltip.getBoundingClientRect();
+        var left = Math.min(x + 14, window.innerWidth - r.width - 10);
+        var top = Math.min(y + 14, window.innerHeight - r.height - 10);
+        tooltip.style.left = left + "px";
+        tooltip.style.top = top + "px";
+      }
+      function hideTip() { tooltip.style.display = "none"; }
+
+      /* ================= countdown ================= */
+      function pad(n) { return (n < 10 ? "0" : "") + n; }
+      function tickCountdown() {
+        var now = Date.now();
+        var ms = Math.max(0, RESET_AT - now);
+        var d = Math.floor(ms / 86400000);
+        var h = Math.floor((ms % 86400000) / 3600000);
+        var m = Math.floor((ms % 3600000) / 60000);
+        var s = Math.floor((ms % 60000) / 1000);
+        var short = d + "d " + pad(h) + "h " + pad(m) + "m";
+        var long = d + "d " + pad(h) + "h " + pad(m) + "m " + pad(s) + "s";
+        $("countdownChip").textContent = short;
+        $("countdownBig").textContent = long;
+      }
+
+      /* ================= hero ================= */
+      function renderHero() {
+        var w = week();
+        var t = catTotals(w);
+        var used = totalUsed(w);
+        var pct = Math.round((used / w.limit) * 1000) / 10;
+        var comparing = state.period === "compare";
+        var lastUsed = totalUsed(WEEKS.last);
+
+        $("periodSub").textContent = w.rangeLabel;
+        $("usagePct").textContent = pct + "%";
+        $("usageCredits").textContent = fmt(used) + " of " + fmt(w.limit) + " credits";
+        $("resetDateLine").textContent = "Tuesday, Oct 20, 2026 · 5:30 PM CDT";
+
+        var note;
+        if (state.period === "last") {
+          note = "Last cycle closed at " + pct + "% — you finished with " + fmt(w.limit - used) + " credits unspent. This week's pace is running hotter; switch to Compare to see it side by side.";
+        } else if (comparing) {
+          var d = deltaPct(used, lastUsed);
+          note = "You're at " + fmt(used) + " credits with a day left in the cycle — " + (d >= 0 ? "up " : "down ") + Math.abs(d) + "% versus the same point last week (" + fmt(lastUsed) + "). Background work, not your main chat, drove most of the increase.";
+        } else {
+          note = "Four-fifths of this burn happened outside your main chat — scheduled jobs, side-chat history, and subagent tasks spent it quietly, in the background.";
+        }
+        $("usageNote").textContent = note;
+
+        // segmented bar
+        var bar = $("usageBar");
+        var html = "";
+        CAT_ORDER.forEach(function (k) {
+          var share = (t[k] / w.limit) * 100;
+          html += '<div style="width:' + share + '%;background:' + CATS[k].color + ';" data-cat="' + k + '"></div>';
+        });
+        var save = appliedSavings();
+        if (state.period !== "last" && save > 0) {
+          var projPct = ((used - save) / w.limit) * 100;
+          html += '<div class="proj-marker" style="left:calc(' + projPct + '% - 1px);"></div>';
+        }
+        bar.innerHTML = html;
+        bar.setAttribute("aria-label", "Usage by category: " + CAT_ORDER.map(function (k) { return CATS[k].name + " " + fmt(t[k]); }).join(", "));
+
+        var legend = "";
+        CAT_ORDER.forEach(function (k) {
+          legend += '<span><span class="sw" style="background:' + CATS[k].color + ';"></span>' + CATS[k].name + ' <strong class="mono" style="color:var(--text);">' + fmt(t[k]) + "</strong></span>";
+        });
+        $("usageBarLegend").innerHTML = legend;
+
+        // pace chips (only meaningful for current cycle)
+        var pace = "";
+        if (state.period === "last") {
+          pace = '<span class="pace-chip">Cycle closed at <strong>' + pct + '%</strong></span>'
+               + '<span class="pace-chip">Unspent <strong>' + fmt(w.limit - used) + " credits</strong></span>";
+        } else {
+          var now = Date.now();
+          var elapsed = Math.max(0.05, (now - CYCLE_START) / 86400000);
+          var remaining = Math.max(0.05, (RESET_AT - now) / 86400000);
+          var rate = used / elapsed;
+          var projected = Math.min(w.limit, Math.round(used + rate * remaining));
+          var projPct2 = Math.round((projected / w.limit) * 100);
+          var outsideMain = Math.round(((used - t.main) / used) * 100);
+          pace = '<span class="pace-chip">Burn rate since reset <strong>' + Math.round(rate) + " credits/day</strong></span>"
+               + '<span class="pace-chip">Projected finish <strong>' + projPct2 + "%</strong> (" + fmt(projected) + " credits)</span>"
+               + '<span class="pace-chip warn">Background jobs will spend ≈<strong>' + fmt(Math.round(rate * remaining * (t.auto / used))) + " more credits</strong> before reset, even if you send nothing</span>"
+               + '<span class="pace-chip">' + outsideMain + '% of this week burned <strong>outside your main chat</strong></span>';
+          if (save > 0) {
+            pace += '<span class="pace-chip" style="background:var(--teal-dim);color:var(--teal);">With fixes applied: <strong>' + fmt(used - save) + " credits (" + Math.round(((used - save) / w.limit) * 100) + "%)</strong></span>";
+          }
+        }
+        $("paceRow").innerHTML = pace;
+      }
+
+      /* ================= KPIs ================= */
+      function renderKPIs() {
+        var w = week();
+        var t = catTotals(w);
+        var used = totalUsed(w);
+        var lw = WEEKS.last, lt = catTotals(lw), lUsed = totalUsed(lw);
+        var bg = t.auto + t.side;
+        var bgPct = Math.round((bg / used) * 1000) / 10;
+        var hogs = 0;
+        w.automations.concat(w.chats).forEach(function (i) { if (i.total / used >= 0.10) hogs++; });
+        var totalSave = RECS.reduce(function (a, r) { return a + r.save; }, 0);
+        var showDelta = state.period !== "this";
+
+        function kpi(label, value, note) {
+          return '<div class="card kpi"><p class="k-label">' + label + '</p><p class="k-value">' + value + '</p><p class="k-note">' + note + "</p></div>";
+        }
+        var html = "";
+        html += kpi("Background burn", bgPct + "%",
+          "<strong>" + fmt(bg) + " credits</strong> spent by automations &amp; side chats" + (showDelta ? " · " + deltaHTML(bg, lt.auto + lt.side) + " vs last wk" : ""));
+        html += kpi("Token hogs flagged", String(hogs),
+          "Consumers eating <strong>10%+ of the week</strong> each" + (showDelta ? "" : " — see the flags below"));
+        html += kpi("Avg cost per main-chat message", w.mainChat.avgPerMsg + ' <small>credits</small>',
+          "<strong>" + fmt(w.mainChat.messages) + " messages</strong> in your main chat" + (showDelta ? " · " + deltaHTML(w.mainChat.total, lw.mainChat.total) + " total" : ""));
+        html += kpi("Savings on the table", fmt(totalSave) + ' <small>credits / wk</small>',
+          "<strong>" + Math.round((totalSave / used) * 100) + "% of this week's burn</strong> is fixable in the recommendations" + (appliedSavings() ? " · <strong>" + fmt(appliedSavings()) + " applied</strong>" : ""));
+        $("kpiRow").innerHTML = html;
+      }
+
+      /* ================= daily chart ================= */
+      function renderDaily() {
+        var w = week();
+        var comparing = state.period === "compare";
+        var lastTotals = WEEKS.last.daily.map(function (d) { return d.auto + d.side + d.main + d.model; });
+        var totals = w.daily.map(function (d) { return d.auto + d.side + d.main + d.model; });
+        var maxV = Math.max.apply(null, totals.concat(comparing ? lastTotals : [])) ;
+        maxV = Math.ceil(maxV * 1.15 / 50) * 50;
+
+        var W = 720, H = 250, padL = 38, padR = 8, padT = 14, padB = 30;
+        var iw = W - padL - padR, ih = H - padT - padB;
+        var bw = iw / 7;
+
+        var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Stacked bar chart of daily credit usage">';
+        // gridlines
+        for (var g = 0; g <= 4; g++) {
+          var gy = padT + ih - (ih * g) / 4;
+          var gv = Math.round((maxV * g) / 4);
+          svg += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (W - padR) + '" y2="' + gy + '" stroke="var(--border-soft)" stroke-width="1"/>'
+               + '<text x="' + (padL - 7) + '" y="' + (gy + 4) + '" text-anchor="end" font-size="10.5" fill="var(--faint)" font-family="IBM Plex Mono, monospace">' + gv + "</text>";
+        }
+        // bars
+        w.daily.forEach(function (d, i) {
+          var x = padL + i * bw + bw * 0.18;
+          var width = bw * 0.64;
+          var y = padT + ih;
+          CAT_ORDER.forEach(function (k) {
+            var hgt = (d[k] / maxV) * ih;
+            y -= hgt;
+            var dim = state.filter && state.filter !== k ? ' opacity="0.18"' : "";
+            svg += '<rect x="' + x + '" y="' + y + '" width="' + width + '" height="' + Math.max(hgt, 0) + '" fill="' + CATS[k].hex + '"' + dim + '><title>' + CATS[k].name + ": " + d[k] + " credits</title></rect>";
+          });
+          svg += '<text x="' + (x + width / 2) + '" y="' + (padT + ih + 19) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + w.labels[i] + "</text>";
+          svg += '<text x="' + (x + width / 2) + '" y="' + (y - 6) + '" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text)" font-family="IBM Plex Mono, monospace">' + totals[i] + "</text>";
+          // hover zone
+          svg += '<rect class="hover-zone" data-day="' + i + '" x="' + (padL + i * bw) + '" y="' + padT + '" width="' + bw + '" height="' + ih + '" fill="transparent"/>';
+        });
+        // compare line
+        if (comparing) {
+          var pts = lastTotals.map(function (v, i) {
+            var cx = padL + i * bw + bw / 2;
+            var cy = padT + ih - (v / maxV) * ih;
+            return cx + "," + cy;
+          }).join(" ");
+          svg += '<polyline points="' + pts + '" fill="none" stroke="var(--text)" stroke-width="2" stroke-dasharray="5 4" opacity="0.75"/>';
+          lastTotals.forEach(function (v, i) {
+            var cx = padL + i * bw + bw / 2;
+            var cy = padT + ih - (v / maxV) * ih;
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="3.2" fill="var(--panel)" stroke="var(--text)" stroke-width="2"/>';
+          });
+        }
+        svg += "</svg>";
+        $("dailyChart").innerHTML = svg;
+
+        var avg = Math.round(totals.reduce(function (a, b) { return a + b; }, 0) / 7);
+        $("dailyAvg").textContent = "avg " + fmt(avg) + " / day over 7 days";
+        $("dailySub").textContent = w.dayTotalsNote + (comparing ? " · dashed line = last week" : "");
+
+        var legend = "";
+        CAT_ORDER.forEach(function (k) {
+          legend += '<button type="button" data-cat="' + k + '" class="' + (state.filter === k ? "active" : "") + '"><span class="sw" style="background:' + CATS[k].color + ';"></span>' + CATS[k].name + "</button>";
+        });
+        if (comparing) legend += '<span style="display:inline-flex;align-items:center;gap:6px;padding:2px 4px;"><span style="display:inline-block;width:18px;border-top:2px dashed var(--muted);"></span>Last week total</span>';
+        $("dailyLegend").innerHTML = legend;
+
+        // hover tooltips
+        var zones = $("dailyChart").querySelectorAll(".hover-zone");
+        zones.forEach(function (z) {
+          z.addEventListener("mousemove", function (ev) {
+            var i = +z.getAttribute("data-day");
+            var d = w.daily[i];
+            var rows = CAT_ORDER.map(function (k) {
+              return '<div class="tt-row"><span><span class="sw" style="display:inline-block;width:8px;height:8px;border-radius:2px;background:' + CATS[k].color + ';margin-right:6px;"></span>' + CATS[k].name + "</span><strong>" + d[k] + "</strong></div>";
+            }).join("");
+            var extra = comparing ? '<div class="tt-row"><span>Last week</span><strong>' + lastTotals[i] + "</strong></div>" : "";
+            showTip('<div class="tt-title">' + w.labels[i] + " · " + totals[i] + " credits</div>" + rows + extra, ev.clientX, ev.clientY);
+          });
+          z.addEventListener("mouseleave", hideTip);
+        });
+        $("dailyLegend").querySelectorAll("button").forEach(function (b) {
+          b.addEventListener("click", function () { setFilter(state.filter === b.getAttribute("data-cat") ? null : b.getAttribute("data-cat")); });
+        });
+      }
+
+      /* ================= donut ================= */
+      function renderDonut() {
+        var w = week();
+        var t = catTotals(w);
+        var used = totalUsed(w);
+        var R = 70, C = 2 * Math.PI * R, gap = 3;
+        var offset = 0;
+        var svg = '<svg viewBox="0 0 168 168" width="156" height="156" role="img" aria-label="Donut chart of usage by category">';
+        svg += '<circle cx="84" cy="84" r="' + R + '" fill="none" stroke="var(--track)" stroke-width="17"/>';
+        CAT_ORDER.forEach(function (k) {
+          var frac = t[k] / used;
+          var len = Math.max(frac * C - gap, 0.5);
+          var dim = state.filter && state.filter !== k ? ' opacity="0.2"' : "";
+          svg += '<circle class="donut-seg" data-cat="' + k + '" cx="84" cy="84" r="' + R + '" fill="none" stroke="' + CATS[k].hex + '" stroke-width="17" stroke-dasharray="' + len + " " + (C - len) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 84 84)" style="cursor:pointer;"' + dim + "><title>" + CATS[k].name + ": " + fmt(t[k]) + " credits (" + Math.round(frac * 100) + "%)</title></circle>";
+          offset += frac * C;
+        });
+        svg += "</svg>";
+        $("donutChart").innerHTML = svg;
+        $("donutTotal").textContent = fmt(used);
+
+        var lw = catTotals(WEEKS.last);
+        var list = "";
+        CAT_ORDER.forEach(function (k) {
+          var share = Math.round((t[k] / used) * 1000) / 10;
+          var d = state.period === "this" ? "" : '<span>' + deltaHTML(t[k], lw[k]) + " vs last wk</span>";
+          list += '<button type="button" class="donut-row' + (state.filter === k ? " active" : "") + '" data-cat="' + k + '">'
+                + '<span class="sw" style="background:' + CATS[k].color + ';"></span>'
+                + '<span class="d-name">' + CATS[k].name + "<span>" + CATS[k].sub + "</span></span>"
+                + '<span class="d-val mono">' + fmt(t[k]) + "<span>" + share + "% of week</span>" + d + "</span>"
+                + "</button>";
+        });
+        $("donutList").innerHTML = list;
+        $("donutList").querySelectorAll(".donut-row").forEach(function (b) {
+          b.addEventListener("click", function () {
+            var k = b.getAttribute("data-cat");
+            setFilter(state.filter === k ? null : k);
+          });
+        });
+        $("donutChart").querySelectorAll(".donut-seg").forEach(function (s) {
+          s.addEventListener("click", function () {
+            var k = s.getAttribute("data-cat");
+            setFilter(state.filter === k ? null : k);
+          });
+        });
+        var fn = $("filterNote");
+        if (state.filter) {
+          fn.style.display = "block";
+          $("filterName").textContent = CATS[state.filter].name;
+        } else {
+          fn.style.display = "none";
+        }
+      }
+
+      /* ================= tables ================= */
+      function miniBars(trend, labels, colorHex) {
+        var max = Math.max.apply(null, trend.concat([1]));
+        var bars = trend.map(function (v) {
+          return '<div class="mb" style="height:' + Math.max(6, (v / max) * 100) + '%;background:' + colorHex + ';" title="' + v + ' credits"></div>';
+        }).join("");
+        var labs = labels.map(function (l) { return "<span>" + l.split(" ")[1] + "</span>"; }).join("");
+        return '<div class="mini-bars">' + bars + '</div><div class="mini-labels">' + labs + "</div>";
+      }
+      function shareCell(share, colorVar) {
+        return '<div class="share-bar"><span class="mono">' + share + '%</span><span class="share-track"><span class="share-fill" style="display:block;width:' + Math.min(share * 4, 100) + '%;background:' + colorVar + ';"></span></span></div>';
+      }
+      function matchesQuery(name) {
+        return !state.query || name.toLowerCase().indexOf(state.query) !== -1;
+      }
+
+      function renderAutomations() {
+        var w = week();
+        var used = totalUsed(w);
+        var lastMap = {};
+        WEEKS.last.automations.forEach(function (a) { lastMap[a.id] = a.total; });
+        var items = w.automations.slice().sort(function (a, b) { return (b.total - a.total) * (state.sortDir.auto === -1 ? 1 : -1); });
+        var html = "";
+        var visible = 0;
+        items.forEach(function (a) {
+          if (!matchesQuery(a.name)) return;
+          visible++;
+          var share = Math.round((a.total / used) * 1000) / 10;
+          var hog = a.total / used >= 0.10;
+          html += '<tr class="main-row" data-row="' + a.id + '">'
+            + '<td class="cell-name" data-label="Automation"><span class="item-name">' + esc(a.name)
+            + (hog ? ' <span class="flag hog">▲ Top consumer</span>' : "")
+            + '</span><span class="item-sub">' + esc(a.schedule) + " · last run " + esc(a.lastRun) + "</span></td>"
+            + '<td class="num mono" data-label="Runs">' + a.runs + "</td>"
+            + '<td class="num mono" data-label="Per run">' + a.perRun + "</td>"
+            + '<td class="num mono" data-label="Total" style="font-weight:600;">' + fmt(a.total) + "</td>"
+            + '<td class="num" data-label="Share of week">' + shareCell(share, CATS.auto.color) + "</td>"
+            + '<td class="num" data-label="vs last wk">' + (state.period === "this" ? '<span style="color:var(--faint)">—</span>' : deltaHTML(a.total, lastMap[a.id])) + "</td>"
+            + "</tr>";
+          if (state.expanded[a.id]) {
+            html += '<tr class="detail-row"><td colspan="6"><div class="detail-grid">'
+              + '<div><h4>Credits per day</h4>' + miniBars(a.trend, w.labels, CATS.auto.hex) + "</div>"
+              + '<div><h4>Schedule</h4><p class="detail-stat">Runs <strong>' + a.runs + '×</strong> this week at <strong>' + a.perRun + " credits</strong> each</p>"
+              + '<p class="detail-stat">Next run <strong>' + esc(a.nextRun) + '</strong></p><p class="detail-stat">Projected weekly cost at this rate: <strong>' + fmt(a.perRun * a.runs) + " credits</strong></p></div>"
+              + '<div><h4>Why it costs this much</h4><p class="detail-stat">' + esc(a.note || "Steady, predictable cost.") + "</p></div>"
+              + "</div></td></tr>";
+          }
+        });
+        if (!visible) html = '<tr class="empty-row"><td colspan="6">No automations match your search.</td></tr>';
+        $("autoBody").innerHTML = html;
+        $("autoTotalBadge").textContent = fmt(catTotals(w).auto) + " credits · " + Math.round((catTotals(w).auto / used) * 100) + "% of week";
+        $("autoDeltaHead").style.visibility = state.period === "this" ? "hidden" : "visible";
+        bindRowClicks("autoBody");
+      }
+
+      function renderChats() {
+        var w = week();
+        var used = totalUsed(w);
+        var lastMap = {};
+        WEEKS.last.chats.forEach(function (c) { lastMap[c.id] = c.total; });
+        var items = w.chats.slice().sort(function (a, b) { return (b.total - a.total) * (state.sortDir.chat === -1 ? 1 : -1); });
+        var html = "";
+        var visible = 0;
+        items.forEach(function (c) {
+          if (!matchesQuery(c.name)) return;
+          visible++;
+          var share = Math.round((c.total / used) * 1000) / 10;
+          var hog = c.total / used >= 0.10;
+          var bloat = c.context >= 100000;
+          var perCall = Math.round((c.total / c.calls) * 10) / 10;
+          html += '<tr class="main-row" data-row="' + c.id + '">'
+            + '<td class="cell-name" data-label="Side chat"><span class="item-name">' + esc(c.name)
+            + (hog ? ' <span class="flag hog">▲ Top consumer</span>' : "")
+            + (bloat ? ' <span class="flag bloat">Bloated history</span>' : "")
+            + '</span><span class="item-sub">' + fmt(c.messages) + " messages · " + esc(c.age) + "</span></td>"
+            + '<td class="num mono" data-label="History carried">' + fmtTok(c.context) + " tok</td>"
+            + '<td class="num mono" data-label="Calls">' + c.calls + "</td>"
+            + '<td class="num mono" data-label="Total" style="font-weight:600;">' + fmt(c.total) + "</td>"
+            + '<td class="num" data-label="Share of week">' + shareCell(share, CATS.side.color) + "</td>"
+            + '<td class="num" data-label="vs last wk">' + (state.period === "this" ? '<span style="color:var(--faint)">—</span>' : deltaHTML(c.total, lastMap[c.id])) + "</td>"
+            + "</tr>";
+          if (state.expanded[c.id]) {
+            var reread = c.context * c.calls;
+            html += '<tr class="detail-row"><td colspan="6"><div class="detail-grid">'
+              + '<div><h4>Credits per day</h4>' + miniBars(c.trend, w.labels, CATS.side.hex) + "</div>"
+              + '<div><h4>The context tax</h4>'
+              + '<div class="tax-bar"><div style="width:' + c.historyShare + '%;background:' + CATS.side.color + ';"></div></div>'
+              + '<p class="detail-stat"><strong>' + c.historyShare + "%</strong> of every call is re-reading old history — only " + (100 - c.historyShare) + "% is new work.</p>"
+              + '<p class="detail-stat">History re-read this week: <strong>' + (Math.round(reread / 100000) / 10) + "M tokens</strong> across " + c.calls + " calls.</p></div>"
+              + '<div><h4>Cost per call</h4><p class="detail-stat"><strong>' + perCall + " credits</strong> average — and it climbs with every message, because the history it drags along keeps growing.</p>"
+              + '<p class="detail-stat">' + esc(c.note || "") + "</p></div>"
+              + "</div></td></tr>";
+          }
+        });
+        if (!visible) html = '<tr class="empty-row"><td colspan="6">No side chats match your search.</td></tr>';
+        $("chatBody").innerHTML = html;
+        var totContext = w.chats.reduce(function (a, c) { return a + c.context * c.calls; }, 0);
+        $("chatSub").textContent = "Every message in a side chat re-sends its entire history as context. This week your side chats re-read " + (Math.round(totContext / 100000) / 10) + "M tokens of old conversation.";
+        $("chatTotalBadge").textContent = fmt(catTotals(w).side) + " credits · " + Math.round((catTotals(w).side / used) * 100) + "% of week";
+        $("chatDeltaHead").style.visibility = state.period === "this" ? "hidden" : "visible";
+        bindRowClicks("chatBody");
+      }
+
+      function renderMainAndTasks() {
+        var w = week();
+        var used = totalUsed(w);
+        var m = w.mainChat;
+        $("mainTotalBadge").textContent = fmt(m.total) + " credits · " + Math.round((m.total / used) * 100) + "% of week";
+        $("mainStats").innerHTML =
+          '<div class="detail-grid" style="grid-template-columns:1fr 1fr;">'
+          + '<div><p class="detail-stat">Messages sent</p><p style="font-size:24px;font-weight:700;margin:2px 0;" class="mono">' + fmt(m.messages) + "</p></div>"
+          + '<div><p class="detail-stat">Average per message</p><p style="font-size:24px;font-weight:700;margin:2px 0;" class="mono">' + m.avgPerMsg + ' <small style="font-size:13px;color:var(--muted);font-weight:500;">credits</small></p></div>'
+          + "</div>"
+          + '<p class="detail-stat" style="margin-top:12px;">Longest thread: <strong>' + esc(m.longestThread) + "</strong> · Peak day: <strong>" + esc(m.peakDay) + "</strong></p>"
+          + '<p class="detail-stat">The main chat is the cheapest place you work — it starts fresh, so it carries no history tax. The same question asked inside an old side chat can cost 3–5× more.</p>';
+
+        var html = "";
+        var visible = 0;
+        w.tasks.forEach(function (t) {
+          if (!matchesQuery(t.name)) return;
+          visible++;
+          var share = Math.round((t.total / used) * 1000) / 10;
+          html += '<tr><td class="cell-name" data-label="Task"><span class="item-name" style="font-weight:500;">' + esc(t.name) + '</span><span class="item-sub">' + esc(t.when) + "</span></td>"
+            + '<td data-label="Model"><span class="flag" style="background:' + (t.model === "Wonder" ? "var(--amber-dim);color:var(--amber);" : "var(--teal-dim);color:var(--teal);") + '">' + t.model + "</span></td>"
+            + '<td class="num mono" data-label="Credits" style="font-weight:600;">' + fmt(t.total) + "</td>"
+            + '<td class="num mono" data-label="Share">' + share + "%</td></tr>";
+        });
+        if (!visible) html = '<tr class="empty-row"><td colspan="4">No tasks match your search.</td></tr>';
+        $("taskBody").innerHTML = html;
+        $("taskTotalBadge").textContent = fmt(catTotals(w).model) + " credits · " + Math.round((catTotals(w).model / used) * 100) + "% of week";
+        $("sparkResp").textContent = fmt(w.models.sparkResp);
+        $("wonderResp").textContent = fmt(w.models.wonderResp);
+      }
+
+      function bindRowClicks(tbodyId) {
+        $(tbodyId).querySelectorAll("tr.main-row").forEach(function (row) {
+          row.addEventListener("click", function () {
+            var id = row.getAttribute("data-row");
+            state.expanded[id] = !state.expanded[id];
+            renderTables();
+          });
+        });
+      }
+
+      function renderTables() {
+        renderAutomations();
+        renderChats();
+        renderMainAndTasks();
+        applySectionFilter();
+      }
+
+      function applySectionFilter() {
+        var f = state.filter;
+        $("secAutomations").classList.toggle("hidden", !!f && f !== "auto");
+        $("secChats").classList.toggle("hidden", !!f && f !== "side");
+        $("secMain").classList.toggle("hidden", !!f && f !== "main");
+        $("secTasks").classList.toggle("hidden", !!f && f !== "model");
+      }
+
+      /* ================= recommendations ================= */
+      function renderRecs() {
+        var w = week();
+        var used = totalUsed(w);
+        var icon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4.5 13.5 11 13.5 9.5 22 19.5 10 12.5 10 13 2"/></svg>';
+        var check = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><polyline points="20 6 9 17 4 12"/></svg>';
+        var html = "";
+        RECS.forEach(function (r) {
+          var applied = !!state.applied[r.id];
+          var pctSave = Math.round((r.save / used) * 1000) / 10;
+          html += '<div class="rec"><div class="rec-icon">' + icon + '</div>'
+            + '<div class="rec-body"><h3>' + esc(r.title) + "</h3><p>" + esc(r.body) + "</p></div>"
+            + '<div class="rec-save"><div class="rs-big mono">−' + fmt(r.save) + '</div><div class="rs-small">credits/wk · ' + pctSave + '%</div>'
+            + '<button type="button" class="btn' + (applied ? " applied" : "") + '" data-rec="' + r.id + '"' + (applied ? " disabled" : "") + ">" + (applied ? check + " Applied" : "Apply fix") + "</button></div></div>";
+        });
+        $("recList").innerHTML = html;
+        var totalSave = RECS.reduce(function (a, r) { return a + r.save; }, 0);
+        var applied = appliedSavings();
+        $("recTotalLine").textContent = applied > 0
+          ? fmt(applied) + " of " + fmt(totalSave) + " credits applied (" + Math.round((applied / used) * 100) + "% of the week)"
+          : fmt(totalSave) + " credits / week (" + Math.round((totalSave / used) * 100) + "% of this week's burn)";
+        $("recList").querySelectorAll("[data-rec]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            state.applied[b.getAttribute("data-rec")] = true;
+            renderAll();
+          });
+        });
+      }
+
+      /* ================= filter / period wiring ================= */
+      function setFilter(k) {
+        state.filter = k;
+        renderAll();
+      }
+      $("clearFilter").addEventListener("click", function () { setFilter(null); });
+
+      document.querySelectorAll("[data-period]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          state.period = b.getAttribute("data-period");
+          document.querySelectorAll("[data-period]").forEach(function (x) {
+            x.setAttribute("aria-pressed", x === b ? "true" : "false");
+          });
+          renderAll();
+        });
+      });
+
+      $("searchInput").addEventListener("input", function (ev) {
+        state.query = ev.target.value.trim().toLowerCase();
+        renderTables();
+      });
+
+      document.querySelectorAll("th.sortable").forEach(function (th) {
+        th.addEventListener("click", function () {
+          var tbl = th.getAttribute("data-sort-table");
+          state.sortDir[tbl] = state.sortDir[tbl] * -1;
+          renderTables();
+        });
+      });
+
+      function renderAll() {
+        renderHero();
+        renderKPIs();
+        renderDaily();
+        renderDonut();
+        renderTables();
+        renderRecs();
+      }
+
+      tickCountdown();
+      setInterval(tickCountdown, 1000);
+      renderAll();
+
+      /* ================= manual entry + localStorage ================= */
+      (function () {
+        var KEY = "usageLens.v1";
+        var MODEL_RATES = { spark: 1.9, wonder: 6.1 }; // credits per response, heuristic
+        var TOKENS_PER_CREDIT = 400; // rough heuristic, see ESTIMATION.md
+        var AVG_TOKENS_PER_MSG = 760; // heuristic for context-tax math
+
+        function load() {
+          try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; }
+        }
+        function save(d) {
+          try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+        }
+        function clear() {
+          try { localStorage.removeItem(KEY); } catch (e) {}
+        }
+        function current() {
+          return {
+            platform: $("inPlatform").value,
+            pct: parseFloat($("inPct").value) || 0,
+            limit: parseInt($("inLimit").value, 10) || 0,
+            reset: $("inReset").value || "",
+            automations: window._ulAutos || [],
+            chats: window._ulChats || []
+          };
+        }
+        window._ulAutos = [];
+        window._ulChats = [];
+
+        function estAuto(a) {
+          var rate = MODEL_RATES[a.model] || 1.9;
+          var runs = parseInt(a.runs, 10) || 0;
+          var toks = parseInt(a.tokens, 10) || 0;
+          // credits per week = runs * (tokens / TOKENS_PER_CREDIT) * (rate / 1.9 baseline)
+          var credits = Math.round(runs * (toks / TOKENS_PER_CREDIT) * (rate / 1.9));
+          return credits;
+        }
+        function estChat(c) {
+          var msgs = parseInt(c.msgs, 10) || 0;
+          var calls = parseInt(c.calls, 10) || 0;
+          var credits = Math.round((msgs * AVG_TOKENS_PER_MSG * calls) / TOKENS_PER_CREDIT);
+          return credits;
+        }
+        function renderLists() {
+          var al = $("autoList");
+          al.innerHTML = window._ulAutos.map(function (a, i) {
+            return '<div class="entry-row"><span class="grow"><strong>' + esc(a.name) + '</strong> <span class="est">' +
+              esc(a.model) + ' &middot; ' + esc(a.runs) + ' runs/wk &middot; ~' + fmt(estAuto(a)) + ' credits/wk (est.)</span></span>' +
+              '<button type="button" class="rm" data-kind="auto" data-i="' + i + '" aria-label="Remove">&times;</button></div>';
+          }).join("");
+          var cl = $("chatList");
+          cl.innerHTML = window._ulChats.map(function (c, i) {
+            return '<div class="entry-row"><span class="grow"><strong>' + esc(c.name) + '</strong> <span class="est">' +
+              fmt(c.msgs) + ' msgs &middot; ' + esc(c.calls) + ' calls/wk &middot; ~' + fmt(estChat(c)) + ' credits/wk context tax (est.)</span></span>' +
+              '<button type="button" class="rm" data-kind="chat" data-i="' + i + '" aria-label="Remove">&times;</button></div>';
+          }).join("");
+        }
+
+        document.addEventListener("click", function (e) {
+          var rm = e.target.closest ? e.target.closest(".rm") : null;
+          if (rm) {
+            var i = parseInt(rm.getAttribute("data-i"), 10);
+            if (rm.getAttribute("data-kind") === "auto") window._ulAutos.splice(i, 1);
+            else window._ulChats.splice(i, 1);
+            renderLists();
+          }
+        });
+
+        $("addAuto").addEventListener("click", function () {
+          var name = $("autoName").value.trim();
+          if (!name) return;
+          window._ulAutos.push({ name: name, model: $("autoModel").value, runs: $("autoRuns").value, tokens: $("autoTokens").value });
+          $("autoName").value = ""; $("autoRuns").value = ""; $("autoTokens").value = "";
+          renderLists();
+        });
+        $("addChat").addEventListener("click", function () {
+          var name = $("chatName").value.trim();
+          if (!name) return;
+          window._ulChats.push({ name: name, msgs: $("chatMsgs").value, calls: $("chatCalls").value });
+          $("chatName").value = ""; $("chatMsgs").value = ""; $("chatCalls").value = "";
+          renderLists();
+        });
+
+        $("saveData").addEventListener("click", function () {
+          var d = current();
+          save(d);
+          updateHeadline(d);
+          $("saveData").textContent = "Saved";
+          setTimeout(function () { $("saveData").textContent = "Save and update dashboard"; }, 1500);
+        });
+        $("clearData").addEventListener("click", function () {
+          clear();
+          window._ulAutos = []; window._ulChats = [];
+          $("inPct").value = ""; $("inLimit").value = ""; $("inReset").value = "";
+          renderLists();
+          $("saveData").textContent = "Cleared";
+          setTimeout(function () { $("saveData").textContent = "Save and update dashboard"; }, 1500);
+        });
+        $("formToggle").addEventListener("click", function () {
+          var b = $("formBody");
+          b.style.display = b.style.display === "none" ? "" : "none";
+        });
+
+        function updateHeadline(d) {
+          if (d.limit > 0 && d.pct > 0) {
+            var used = Math.round(d.limit * d.pct / 100);
+            $("usagePct").textContent = d.pct.toFixed(1) + "%";
+            $("usageCredits").textContent = fmt(used) + " of " + fmt(d.limit) + " credits";
+            $("usageNote").textContent = "Entered by you on " + d.platform + ". Estimates below are illustrative until you calibrate them.";
+          }
+          if (d.reset) {
+            var r = new Date(d.reset);
+            if (!isNaN(r.getTime())) {
+              $("resetDateLine").textContent = "Resets " + r.toLocaleString();
+            }
+          }
+          var autoTotal = window._ulAutos.reduce(function (s, a) { return s + estAuto(a); }, 0);
+          var chatTotal = window._ulChats.reduce(function (s, c) { return s + estChat(c); }, 0);
+          if (autoTotal > 0 || chatTotal > 0) {
+            $("usageNote").textContent = ($("usageNote").textContent ? $("usageNote").textContent + " " : "") +
+              "Your inventory: ~" + fmt(autoTotal) + " credits/wk from automations, ~" + fmt(chatTotal) + " credits/wk in chat context tax (estimates).";
+          }
+        }
+
+        // restore on load
+        var d = load();
+        if (d) {
+          $("inPlatform").value = d.platform || "Muse";
+          if (d.pct) $("inPct").value = d.pct;
+          if (d.limit) $("inLimit").value = d.limit;
+          if (d.reset) $("inReset").value = d.reset;
+          window._ulAutos = d.automations || [];
+          window._ulChats = d.chats || [];
+          renderLists();
+          updateHeadline(d);
+        }
+      })();
+    </script>
+  </body>
+</html>
